@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 
 #include "Image.h"
 
 /* The fractal data type */
-#define FTYPE double
+#define FTYPE float
 #define FTYPE_STR "%f "
 
 /* The colormap */
@@ -13,38 +14,35 @@ int red[]   = {0, 0  , 0,   0  , 128, 255, 255, 255};
 int green[] = {0, 0  , 128, 255, 128, 128, 255, 255};
 int blue[]  = {0, 255, 255, 128, 0  , 0  , 128, 255};
 
-double logtwo;
+/* Calculated log (2) beforehand */
+double logtwo = 0.693147180559945;
 
-/* Generates given mandelbrot and returns pointer to data */
 FTYPE *gen_mandel (double xmin, double xmax, 
 		   double ymin, double ymax,
 		   double res, int it);
-
-/* Get value at point */
 FTYPE get_val (double creal, double cimag, int it);
-
-/* Get color for given value */
 Rgb colormap (FTYPE val, int it);
-
-/* Write out the colormap to see what it looks like*/
 void write_colormap ();
+int write_data (FTYPE *img, int w, int h, int it);
+
+/* Output options */
+int write_text = 0; /* Write textfile */
+int write_bmp = 1;  /* Write bitmap */
+int write_pipe = 0; /* Write data through pipe to parent */
+int pipe_fid = 0;   /* Pipe to parent */
 
 int main ()
 {
-  write_colormap ();
-  logtwo = log (2); /* Calculate this only once */
-  
+  write_colormap (); /* Write out colormap for viewing */
+
   /* Parameters */
   double xmin = -2.5;
   double xmax = 1.5;
   double ymin = -1.5;
   double ymax = 1.5;
-  double res = 0.0005;
+  double res = 0.001;
   int it = 256;
-  
-  /* Output options */
-  int write_text = 0;
-  int write_bmp = 1;
+  int jobs = 5;
   
   /* Image dimensions */
   int w = ceil ((xmax - xmin) / res);
@@ -52,12 +50,57 @@ int main ()
   printf ("Image size: %dx%d\n", w, h);
 
   /* Generate fractal */
-  printf ("Start.\n");
-  FTYPE *img = gen_mandel (xmin, xmax, ymin, ymax, res, it);
-  printf ("Done.\n");
-
-  /* Write out data */
+  printf ("Generating fractal ...\n");
+  int i;
+  double job_y = (ymax - ymin)/jobs; /* Job image height */
+  int *read_pipe = malloc ((jobs + 1) * sizeof(int));
+  for (i = 0; i < jobs; i++)
+    {
+      /* Communication pipe */
+      pipe (read_pipe + i);
+      pipe_fid = read_pipe[i + 1];
+      
+      pid_t fork_out = fork ();
+      if (fork_out < 0)
+	fprintf (stderr, "Failed to fork\n");
+      
+      if (fork_out == 0)
+	{
+	  FTYPE *img = malloc (w * h/jobs * sizeof (FTYPE));
+	  img = gen_mandel (xmin, xmax,
+			    ymin + job_y * i, ymax + job_y * (i + 1),
+			    res, it);
+	  write_text = 1;
+	  write_data (img, w, h/jobs, it);	  
+	  
+	  /* Write result to parent */
+	  write_bmp = 0;
+	  write_text = 0;
+	  write_pipe = 1;
+	  write_data (img, w, h/jobs, it);	  
+	  
+	  exit (EXIT_SUCCESS);
+	}
+    }
   
+  /* Parent collects data */
+  FTYPE *img = malloc (w * h * sizeof (FTYPE));
+  for (i = 0; i < jobs; i++)
+    {
+      read(read_pipe[i], 
+	   (img + i * (w * h/jobs)), 
+	   (w * h/jobs) * sizeof (FTYPE));
+    }
+  
+  /* Write out data */
+  printf ("Writing data ...\n");  
+  write_data (img, w, h, it);
+  
+  exit (EXIT_SUCCESS);
+}
+
+int write_data (FTYPE *img, int w, int h, int it)
+{
   if (write_text)
     {
       FILE *fout = fopen ("out.dat", "w");
@@ -83,7 +126,12 @@ int main ()
       destroyImage (bmp);
     }
 
-  exit (EXIT_SUCCESS);
+  if (write_pipe)
+    {
+      write (pipe_fid, img, w * h * sizeof (FTYPE));
+    }
+  
+  return 0;
 }
 
 FTYPE *gen_mandel (double xmin, double xmax, double ymin, double ymax,
