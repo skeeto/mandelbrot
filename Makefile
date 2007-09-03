@@ -9,7 +9,7 @@ objects = bmpReader.o \
           yuvReader.o
 
 frac : $(objects)
-	gcc $(LDFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) $^ -o $@
 
 frac.o : frac.c Image.h
 bmpReader.o: bmpReader.c \
