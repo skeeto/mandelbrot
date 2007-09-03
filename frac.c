@@ -63,7 +63,7 @@ int main ()
   /* Image dimensions */
   int w = ceil ((xmax - xmin) / res);
   int h = ceil ((ymax - ymin) / res);
-  printf ("Image size: %dx%d\n", w, h);
+  printf ("Image: %dx%d, %d iterations, %d jobs\n", w, h, it, jobs);
 
   /* Generate fractal */
   printf ("Generating fractal ...\n");
@@ -106,6 +106,7 @@ int main ()
       read(read_pipe[i], 
 	   (img + i * (w * h/jobs)), 
 	   (w * h/jobs) * sizeof (FTYPE));
+      printf ("Job done: %d\n", i + 1);
     }
   
   /* Write out data */
