@@ -84,7 +84,7 @@ int main ()
 	{
 	  FTYPE *img = malloc (w * h/jobs * sizeof (FTYPE));
 	  img = gen_mandel (xmin, xmax,
-			    ymin + job_y * i, ymax + job_y * (i + 1),
+			    ymin + job_y * i, ymin + job_y * (i + 1),
 			    res, it);
 	  write_text = 1;
 	  write_data (img, w, h/jobs, it);	  
