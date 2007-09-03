@@ -86,8 +86,6 @@ int main ()
 	  img = gen_mandel (xmin, xmax,
 			    ymin + job_y * i, ymin + job_y * (i + 1),
 			    res, it);
-	  write_text = 1;
-	  write_data (img, w, h/jobs, it);	  
 	  
 	  /* Write result to parent */
 	  write_bmp = 0;
