@@ -18,19 +18,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
+#include <errno.h>
 
+#include "common.h"
+#include "colormap.h"
 #include "Image.h"
-
-/* The fractal data type */
-#define FTYPE float
-#define FTYPE_STR "%f "
-
-/* The colormap */
-/* *INDENT-OFF* */
-int red[]   = { 0, 0,   0,   0,   128, 255, 255, 255 };
-int green[] = { 0, 0,   128, 255, 128, 128, 255, 255 };
-int blue[]  = { 0, 255, 255, 128, 0,   0,   128, 255 };
-/* *INDENT-ON* */
 
 /* Calculated log (2) beforehand */
 double logtwo = 0.693147180559945;
@@ -42,8 +35,6 @@ FTYPE *gen_mandel_p (int width, int height,
 		     double xmin, double xmax,
 		     double ymin, double ymax, int it, int jobs);
 FTYPE get_val (double creal, double cimag, int it);
-Rgb colormap (FTYPE val, int it);
-void write_colormap ();
 int write_data (FTYPE * img, int w, int h, int it);
 
 /* Output options */
@@ -52,9 +43,15 @@ int write_bmp = 1;		/* Write bitmap */
 int write_pipe = 0;		/* Write data through pipe to parent */
 int pipe_fid = 0;		/* Pipe to parent */
 
-int main ()
+/* Program name */
+char *progname;
+
+int main (int argc, char **argv)
 {
-  write_colormap ();		/* Write out colormap for viewing */
+  (void) argc;
+  progname = argv[0];
+
+  write_colormap ("cmap.bmp");	/* Write out colormap for viewing */
 
   /* Parameters */
   int width = 800;
@@ -92,7 +89,7 @@ FTYPE *gen_mandel_p (int width, int height,
   printf ("Data  : x => [%f, %f], y => [%f, %f]\n", xmin, xmax, ymin, ymax);
 
   /* Prepare job handling data */
-  int *job_height = malloc (jobs * sizeof (int));
+  int *job_height = xmalloc (jobs * sizeof (int));
   int jobn, htotal = 0;
   for (jobn = 0; jobn < jobs; jobn++)
     {
@@ -103,7 +100,7 @@ FTYPE *gen_mandel_p (int width, int height,
       htotal += job_height[jobn];
     }
   double job_y = (ymax - ymin) / jobs;
-  int *read_pipe = malloc ((jobs + 1) * sizeof (int));
+  int *read_pipe = xmalloc ((jobs + 1) * sizeof (int));
 
   /* Generate fractal */
   int i;
@@ -119,7 +116,7 @@ FTYPE *gen_mandel_p (int width, int height,
 
       if (fork_out == 0)
 	{
-	  FTYPE *img = malloc (width * job_height[i] * sizeof (FTYPE));
+	  FTYPE *img = xmalloc (width * job_height[i] * sizeof (FTYPE));
 	  img = gen_mandel (width, job_height[i],
 			    xmin, xmax,
 			    ymin + job_y * i, ymin + job_y * (i + 1), it);
@@ -135,7 +132,7 @@ FTYPE *gen_mandel_p (int width, int height,
     }
 
   /* Parent collects data */
-  FTYPE *img = malloc (width * height * sizeof (FTYPE));
+  FTYPE *img = xmalloc (width * height * sizeof (FTYPE));
   int loc = 0;
   for (i = 0; i < jobs; i++)
     {
@@ -192,7 +189,7 @@ FTYPE *gen_mandel (int width, int height,
   double yres = (ymax - ymin) / height;
 
   /* Fractal data */
-  FTYPE *img = (FTYPE *) malloc (width * height * sizeof (FTYPE));
+  FTYPE *img = (FTYPE *) xmalloc (width * height * sizeof (FTYPE));
 
   int i, j;
   for (j = 0; j < height; j++)
@@ -229,48 +226,15 @@ FTYPE get_val (double creal, double cimag, int it)
   return out;
 }
 
-Rgb colormap (FTYPE val, int it)
+void *xmalloc (size_t size)
 {
-  Rgb color;
-
-  /* Colormap size */
-  int map_len = sizeof (red) / sizeof (int);
-  int trans = map_len - 1;
-
-  /* Base transition */
-  int base = val / it * trans;
-  if (base >= map_len)
+  void *mem = malloc (size);
+  if (mem == NULL)
     {
-      base = map_len - 1;
-      val = it;
+      fprintf (stderr, "%s: malloc failed - %s\n",
+	       progname, strerror (errno));
+      exit (EXIT_FAILURE);
     }
 
-  /* Interpolate */
-  color.red = red[base]
-    + (val - (it / trans) * base) / (it / trans)
-    * (red[base + 1] - red[base]);
-
-  color.green = green[base]
-    + (val - (it / trans) * base) / (it / trans)
-    * (green[base + 1] - green[base]);
-
-  color.blue = blue[base]
-    + (val - (it / trans) * base) / (it / trans)
-    * (blue[base + 1] - blue[base]);
-
-  return color;
-}
-
-void write_colormap ()
-{
-  int w = 400;
-  int h = 20;
-  Image cmap = createImage (w, h);
-
-  int i;
-  for (i = 0; i < w; i++)
-    imageFillRectRgb (cmap, i, 0, i + 1, h, colormap (i, w));
-
-  saveImage (cmap, "cmap.bmp");
-  destroyImage (cmap);
+  return mem;
 }
