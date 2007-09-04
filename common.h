@@ -10,5 +10,6 @@
 void *xmalloc (size_t size);	/* malloc wrapper */
 
 extern char *progname;		/* Program name */
+extern int verbose;
 
 #endif

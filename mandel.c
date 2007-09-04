@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 
 #include "mandel.h"
 #include "common.h"
@@ -74,7 +75,7 @@ FTYPE *gen_mandel_p (int width, int height,
 	  write_bmp = 0;
 	  write_text = 0;
 	  write_pipe = 1;
-	  write_data (img, width, job_height[i], it);
+	  write_data ("pipe", img, width, job_height[i], it);
 
 	  exit (EXIT_SUCCESS);
 	}
@@ -97,11 +98,15 @@ FTYPE *gen_mandel_p (int width, int height,
   return img;
 }
 
-int write_data (FTYPE * img, int w, int h, int it)
+int write_data (char *basename, FTYPE * img, int w, int h, int it)
 {
+  int filename_length = strlen (basename) + 1 + 4;
+  char *filename = xmalloc (filename_length);
+
   if (write_text)
     {
-      FILE *fout = fopen ("out.dat", "w");
+      snprintf (filename, filename_length, "%s.txt", basename);
+      FILE *fout = fopen (filename, "w");
       int i, j;
       for (j = 0; j < h; j++)
 	{
@@ -114,12 +119,13 @@ int write_data (FTYPE * img, int w, int h, int it)
 
   if (write_bmp)
     {
+      snprintf (filename, filename_length, "%s.bmp", basename);
       Image bmp = createImage (w, h);
       int i, j;
       for (j = 0; j < h; j++)
 	for (i = 0; i < w; i++)
 	  imageSetPixelRgb (bmp, i, j, colormap (img[i + j * w], it));
-      saveImage (bmp, "out.bmp");
+      saveImage (bmp, filename);
       destroyImage (bmp);
     }
 
@@ -127,6 +133,8 @@ int write_data (FTYPE * img, int w, int h, int it)
     {
       write (pipe_fid, img, w * h * sizeof (FTYPE));
     }
+
+  free (filename);
 
   return 0;
 }
