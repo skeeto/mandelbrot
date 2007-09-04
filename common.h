@@ -7,7 +7,8 @@
 #define FTYPE float
 #define FTYPE_STR "%f "
 
-/* malloc wrapper */
-void *xmalloc (size_t size);
+void *xmalloc (size_t size);	/* malloc wrapper */
+
+extern char *progname;		/* Program name */
 
 #endif

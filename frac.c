@@ -18,9 +18,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
-#include <string.h>
-#include <errno.h>
 
+#include "mandel.h"
 #include "common.h"
 #include "colormap.h"
 #include "Image.h"
@@ -28,66 +27,16 @@
 /* Calculated log (2) beforehand */
 double logtwo = 0.693147180559945;
 
-FTYPE *gen_mandel (int width, int height,
-		   double xmin, double xmax,
-		   double ymin, double ymax, int it);
-FTYPE *gen_mandel_p (int width, int height,
-		     double xmin, double xmax,
-		     double ymin, double ymax, int it, int jobs);
-FTYPE get_val (double creal, double cimag, int it);
-int write_data (FTYPE * img, int w, int h, int it);
-
 /* Output options */
 int write_text = 0;		/* Write textfile */
 int write_bmp = 1;		/* Write bitmap */
 int write_pipe = 0;		/* Write data through pipe to parent */
 int pipe_fid = 0;		/* Pipe to parent */
 
-/* Program name */
-char *progname;
-
-int main (int argc, char **argv)
-{
-  (void) argc;
-  progname = argv[0];
-
-  write_colormap ("cmap.bmp");	/* Write out colormap for viewing */
-
-  /* Parameters */
-  int width = 800;
-  int height = 600;
-  double xmin = -2.5;
-  double xmax = 1.5;
-  double ymin = -1.5;
-  double ymax = 1.5;
-  int it = 256;
-  int jobs = 1;
-
-  /* The fractal */
-  FTYPE *img;
-
-  printf ("Generating fractal ...\n");
-  if (jobs > 1)
-    img = gen_mandel_p (width, height, xmin, xmax, ymin, ymax, it, jobs);
-  else
-    img = gen_mandel (width, height, xmin, xmax, ymin, ymax, it);
-
-  /* Write out data */
-  printf ("Writing data ...\n");
-  write_data (img, width, height, it);
-  free (img);
-
-  exit (EXIT_SUCCESS);
-}
-
 FTYPE *gen_mandel_p (int width, int height,
 		     double xmin, double xmax,
 		     double ymin, double ymax, int it, int jobs)
 {
-  /* Image description */
-  printf ("Image : %dx%d, %d iterations, %d jobs\n", width, height, it, jobs);
-  printf ("Data  : x => [%f, %f], y => [%f, %f]\n", xmin, xmax, ymin, ymax);
-
   /* Prepare job handling data */
   int *job_height = xmalloc (jobs * sizeof (int));
   int jobn, htotal = 0;
@@ -224,17 +173,4 @@ FTYPE get_val (double creal, double cimag, int it)
 		       log (log (sqrt (zreal * zreal + zimag * zimag))) /
 		       logtwo);
   return out;
-}
-
-void *xmalloc (size_t size)
-{
-  void *mem = malloc (size);
-  if (mem == NULL)
-    {
-      fprintf (stderr, "%s: malloc failed - %s\n",
-	       progname, strerror (errno));
-      exit (EXIT_FAILURE);
-    }
-
-  return mem;
 }
