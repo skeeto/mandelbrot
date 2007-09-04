@@ -3,7 +3,7 @@ LDFLAGS = -lm
 
 objects = bmpReader.o \
 	bmpWriter.o \
-	frac.o \
+	mandel.o \
 	Image.o \
 	pnmReader.o \
 	yuvReader.o \
@@ -11,11 +11,11 @@ objects = bmpReader.o \
 	main.o
 
 # Main program linking
-frac : $(objects)
+mandel : $(objects)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 # Objects
-frac.o : frac.c \
+mandel.o : mandel.c \
 	Image.h \
 	common.h \
 	mandel.h
@@ -43,4 +43,4 @@ main.o: main.c \
 
 # Clean target
 clean :
-	$(RM) $(objects) frac
+	$(RM) $(objects) mandel
