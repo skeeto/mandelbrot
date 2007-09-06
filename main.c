@@ -37,8 +37,6 @@ int main (int argc, char **argv)
   (void) argc;
   progname = argv[0];
 
-  write_colormap ("cmap.bmp");	/* Write out colormap for viewing */
-
   /* Parameters */
   int width = 800;
   int height = 600;
