@@ -49,11 +49,11 @@ int main (int argc, char **argv)
   int jobs = 1;
 
   /* Zoom */
-  int zoom_it = 1;		/* zoom iterations */
-  double zoom_rate = 0.25;	/* image reduction per step */
-  int zoom_jobs = 2;
-  double zoomx = 0.27322626;
-  double zoomy = 0.595153338;
+  int zoom_it = 440;		/* zoom iterations */
+  double zoom_rate = 0.0625;	/* image reduction per step */
+  int zoom_jobs = 4;
+  double zoomx = -1.747994081595;
+  double zoomy = -0.011269106796;
 
   int zi = 0;
   int zj = 0;
