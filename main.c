@@ -30,6 +30,7 @@
 char *progname;
 
 int verbose = 1;
+int gzip_output = 1;
 
 int main (int argc, char **argv)
 {

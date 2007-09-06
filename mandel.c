@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #include "mandel.h"
 #include "common.h"
@@ -127,6 +128,9 @@ int write_data (char *basename, FTYPE * img, int w, int h, int it)
 	  imageSetPixelRgb (bmp, i, j, colormap (img[i + j * w], it));
       saveImage (bmp, filename);
       destroyImage (bmp);
+
+      if (gzip_output)
+	gzip_file (filename);
     }
 
   if (write_pipe)
@@ -137,6 +141,33 @@ int write_data (char *basename, FTYPE * img, int w, int h, int it)
   free (filename);
 
   return 0;
+}
+
+void gzip_file (char *filename)
+{
+  char *fargv[4];
+  fargv[0] = "gzip";
+  fargv[1] = "--fast";
+  fargv[1] = filename;
+  fargv[2] = NULL;
+
+  pid_t child = fork ();
+
+  if (child < 0)
+    {
+      fprintf (stderr, "%s: gzip fork failed\n", progname);
+      exit (EXIT_FAILURE);
+    }
+
+  if (child > 0)
+    {
+      execvp ("gzip", fargv);
+
+      fprintf (stderr, "%s: execvp failed\n", progname);
+      exit (EXIT_FAILURE);
+    }
+
+  waitpid (child, NULL, 0);
 }
 
 FTYPE *gen_mandel (int width, int height,

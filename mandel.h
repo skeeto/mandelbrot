@@ -12,5 +12,6 @@ FTYPE *gen_mandel_p (int width, int height,
 		     double ymin, double ymax, int it, int jobs);
 FTYPE get_val (double creal, double cimag, int it);
 int write_data (char *basename, FTYPE * img, int w, int h, int it);
+void gzip_file (char *filename);
 
 #endif
