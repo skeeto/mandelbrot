@@ -45,15 +45,15 @@ int main (int argc, char **argv)
   double xmax = 1.5;
   double ymin = -1.5;
   double ymax = 1.5;
-  int it = 256;
-  int jobs = 4;
+  int it = 1024;
+  int jobs = 1;
 
   /* Zoom */
   int zoom_it = 1;		/* zoom iterations */
   double zoom_rate = 0.25;	/* image reduction per step */
-  int zoom_jobs = 1;
-  double zoomx = -0.745;
-  double zoomy = 0.1;
+  int zoom_jobs = 2;
+  double zoomx = 0.27322626;
+  double zoomy = 0.595153338;
 
   int zi = 0;
   int zj = 0;
@@ -108,7 +108,7 @@ int main (int argc, char **argv)
 	    {
 	      zi++;
 	      zj++;
-	      break;
+	      continue;
 	    }
 
 	  if (zi > 0)
@@ -148,7 +148,8 @@ int main (int argc, char **argv)
       wait (NULL);
       zj--;
     }
-  printf ("Completed %d frames.\n", zoom_it);
+  if (verbose)
+    printf ("Completed %d frames.\n", zoom_it);
 
   exit (EXIT_SUCCESS);
 }
