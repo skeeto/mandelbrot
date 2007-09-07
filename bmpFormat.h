@@ -16,6 +16,9 @@
  * http://ultra-premium.com/b
  */
 
+#ifndef BMP_FORMAT_H
+#define BMP_FORMAT_H
+
 typedef struct
 {
   unsigned short int type;
@@ -36,3 +39,5 @@ typedef struct
   unsigned int ncolours;
   unsigned int importantcolours;
 } __attribute__ ((__packed__)) INFOHEADER;
+
+#endif

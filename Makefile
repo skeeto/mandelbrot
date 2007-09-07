@@ -1,12 +1,9 @@
 CFLAGS = -O2 -W -Wall
 LDFLAGS = -lm
 
-objects = bmpReader.o \
-	bmpWriter.o \
+objects = bmpWriter.o \
 	mandel.o \
 	Image.o \
-	pnmReader.o \
-	yuvReader.o \
 	colormap.o \
 	main.o \
 	parse.o
@@ -20,19 +17,11 @@ mandel.o : mandel.c \
 	Image.h \
 	common.h \
 	mandel.h
-bmpReader.o: bmpReader.c \
-	bmpFormat.h
 bmpWriter.o: bmpWriter.c \
 	bmpFormat.h
 Image.o: Image.c \
 	Image.h \
-	bmpWriter.h \
-	bmpReader.h \
-	pnmReader.h \
-	yuvReader.h
-pnmReader.o: pnmReader.c \
-	pnmReader.h
-yuvReader.o: yuvReader.c
+	bmpWriter.h 
 colormap.o: colormap.c \
 	colormap.h \
 	Image.h \

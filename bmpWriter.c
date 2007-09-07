@@ -38,7 +38,7 @@ void writeBmp (char *filename, int width, int height, unsigned char *data)
 {
   FILE *out = fopen (filename, "w");
 
-  // Write main header
+  /* Write main header */
   HEADER head;
   head.type = 0x4d42;
   head.size =
@@ -49,7 +49,7 @@ void writeBmp (char *filename, int width, int height, unsigned char *data)
 
   writeHeader (head, out);
 
-  // Write "info header"
+  /* Write "info header" */
   INFOHEADER infoHead;
   infoHead.size = sizeof (INFOHEADER);
   infoHead.width = width;
@@ -65,7 +65,7 @@ void writeBmp (char *filename, int width, int height, unsigned char *data)
 
   writeInfoHeader (infoHead, out);
 
-  // Write the data
+  /* Write the data */
   int padSize = padOut (width * 3) - (width * 3);
   int y, x;
   for (y = height - 1; y >= 0; y--)
@@ -77,13 +77,11 @@ void writeBmp (char *filename, int width, int height, unsigned char *data)
 	  fwrite (&(data[(y * width + x) * 3 + 2]), 1, 1, out);
 	}
 
-      // Write padding
-      //      char pad = '\0';
+      /* Write padding */
       int i;
       for (i = 0; i < padSize; i++)
 	{
 	  fputc (0, out);
-//                      fwrite(&pad, 1, 1, out);
 	}
     }
 

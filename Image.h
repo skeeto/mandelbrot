@@ -30,22 +30,16 @@ typedef struct Rgb
 
 
 Image createImage (int width, int height);
-Image loadImage (char *filename);
-Image loadImageFixedResolution (char *filename, int width, int height);
 Image duplicateImage (Image img);
 void saveImage (Image img, char *filename);
 void destroyImage (Image img);
 
 void imageSetPixel (Image img, int x, int y, int red, int green, int blue);
 void imageSetPixelRgb (Image img, int x, int y, Rgb rgb);
-void imageGetPixel (Image img, int x, int y, int *red, int *green, int *blue);
-Rgb imageGetPixelRgb (Image img, int x, int y);
 
 void imageFillRect (Image img, int left, int top, int right, int bottom,
 		    int red, int green, int blue);
 void imageFillRectRgb (Image img, int left, int top, int right, int bottom,
 		       Rgb rgb);
-int imageGetWidth (Image img);
-int imageGetHeight (Image img);
 
 #endif
