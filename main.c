@@ -20,39 +20,111 @@
 #include <errno.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/wait.h>
 
 #include "mandel.h"
 #include "common.h"
 #include "colormap.h"
+#include "parse.h"
 
 /* Program name */
 char *progname;
+char *version = "0.1-alpha";
 
 int verbose = 1;
-int gzip_output = 1;
+int gzip_output = 0;
+
+/* Parameters */
+int width = 800;
+int height = 600;
+double xmin = -2.5;
+double xmax = 1.5;
+double ymin = -1.5;
+double ymax = 1.5;
+int it = 256;
+int jobs = 1;
+
+/* Zoom */
+int zoom_it = 1;
+double zoom_rate = 0.1;
+int zoom_jobs = 2;
+double zoomx = -1.268794803623;
+double zoomy = 0.353676833206;
+
+void print_version ()
+{
+  printf ("mandelgen, version %s.\n", version);
+  printf ("Copyright (C) 2007 Chris Wellons\n");
+  printf ("This is free software; see the source code ");
+  printf ("for copying conditions.\n");
+  printf ("There is ABSOLUTELY NO WARRANTY; not even for ");
+  printf ("MERCHANTIBILITY or\nFITNESS FOR A PARTICULAR PURPOSE.\n\n");
+}
+
+/* program usage information */
+void print_usage (int ret)
+{
+  printf ("Usage: %s [options] CONFIG_FILE\n\nOptions:\n\n", progname);
+  printf ("\t-c           Create a colormap image\n");
+  printf ("\t-z           Zip output files\n");
+  printf ("\t-q           Quiet. Only output errors\n");
+  printf ("\t-v           Print version info\n");
+  printf ("\t-h           Print this usage text\n");
+  exit (ret);
+}
 
 int main (int argc, char **argv)
 {
-  (void) argc;
   progname = argv[0];
 
-  /* Parameters */
-  int width = 800;
-  int height = 600;
-  double xmin = -2.5;
-  double xmax = 1.5;
-  double ymin = -1.5;
-  double ymax = 1.5;
-  int it = 1024;
-  int jobs = 1;
+  int c;
+  while ((c = getopt (argc, argv, "qzvhc")) != -1)
+    switch (c)
+      {
+      case 'c':		/* colormap */
+	write_colormap ("cmap.bmp");
+	break;
+      case 'z':		/* gzip output */
+	gzip_output = 1;
+	break;
+      case 'q':		/* quiet */
+	verbose = 0;
+	break;
+      case 'h':		/* print help */
+	print_usage (EXIT_SUCCESS);
+	break;
+      case 'v':		/* version */
+	print_version ();
+	break;
+      case '?':		/* bad argument */
+	print_usage (EXIT_FAILURE);
+      }
 
-  /* Zoom */
-  int zoom_it = 440;		/* zoom iterations */
-  double zoom_rate = 0.0625;	/* image reduction per step */
-  int zoom_jobs = 4;
-  double zoomx = -1.747994081595;
-  double zoomy = -0.011269106796;
+  if (argc - optind > 1)
+    {
+      fprintf (stderr, "%s: too many config files\n", progname);
+      print_usage (EXIT_FAILURE);
+    }
+
+  FILE *infile;
+  if (argc - optind == 1)
+    {
+      infile = fopen (argv[optind], "r");
+      load_config (infile);
+      fclose (infile);
+    }
+  else
+    {
+      load_config (stdin);
+    }
+
+  if (verbose)
+    print_version ();
+
+  if (zoom_jobs > zoom_it)
+    zoom_jobs = zoom_it;
 
   int zi = 0;
   int zj = 0;

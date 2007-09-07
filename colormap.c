@@ -5,17 +5,25 @@
 
 /* The colormap */
 /* *INDENT-OFF* */
-int red[]   = { 0, 0,   0,   0,   128, 255, 255, 255, 0   };
-int green[] = { 0, 0,   128, 255, 128, 128, 255, 255, 0   };
-int blue[]  = { 0, 255, 255, 128, 0,   0,   128, 255, 255 };
+int prered[]   = { 0, 0,   0,   0,   128, 255, 255, 255 };
+int pregreen[] = { 0, 0,   128, 255, 128, 128, 255, 255 };
+int preblue[]  = { 0, 255, 255, 128, 0,   0,   128, 255 };
 /* *INDENT-ON* */
+int cmap_len = 8;
+int cmap_edit = 0;
+
+int *red = prered;
+int *green = pregreen;
+int *blue = preblue;
+
+int cwidth = 50;
 
 Rgb colormap (FTYPE val, int it)
 {
   Rgb color;
 
   /* Colormap size */
-  int map_len = sizeof (red) / sizeof (int);
+  int map_len = cmap_len;
 
 #if FLAT_CMAP
   map_len--;
@@ -43,7 +51,6 @@ Rgb colormap (FTYPE val, int it)
     * (blue[base + 1] - blue[base]);
 #else
   (void) it;
-  int cwidth = 50;
   if (val < cwidth)
     {
       color.red = red[1] - (red[1] - red[0]) * (cwidth - val) / cwidth;
@@ -54,12 +61,15 @@ Rgb colormap (FTYPE val, int it)
     }
 
   val -= cwidth;
-  int base = ((int) val / cwidth % (map_len - 2)) + 1;
+  int base = ((int) val / cwidth % (map_len - 1)) + 1;
   double perc = (val - (cwidth * (int) (val / cwidth))) / cwidth;
+  int top = base + 1;
+  if (top >= map_len)
+    top = 1;
 
-  color.red = red[base] + (red[base + 1] - red[base]) * perc;
-  color.green = green[base] + (green[base + 1] - green[base]) * perc;
-  color.blue = blue[base] + (blue[base + 1] - blue[base]) * perc;
+  color.red = red[base] + (red[top] - red[base]) * perc;
+  color.green = green[base] + (green[top] - green[base]) * perc;
+  color.blue = blue[base] + (blue[top] - blue[base]) * perc;
 
 #endif
   return color;
@@ -67,7 +77,7 @@ Rgb colormap (FTYPE val, int it)
 
 void write_colormap (char *filename)
 {
-  int w = 400;
+  int w = cwidth * cmap_len * 1.5;
   int h = 20;
   Image cmap = createImage (w, h);
 

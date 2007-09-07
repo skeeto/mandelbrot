@@ -8,7 +8,8 @@ objects = bmpReader.o \
 	pnmReader.o \
 	yuvReader.o \
 	colormap.o \
-	main.o
+	main.o \
+	parse.o
 
 # Main program linking
 mandel : $(objects)
@@ -39,7 +40,12 @@ colormap.o: colormap.c \
 main.o: main.c \
 	common.h \
 	colormap.h \
-	mandel.h
+	mandel.h \
+	parse.h
+parse.o: parse.c \
+	parse.h \
+	common.h \
+	colormap.h
 
 # Clean target
 clean :
