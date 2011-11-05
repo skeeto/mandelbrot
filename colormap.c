@@ -62,7 +62,7 @@ Rgb colormap (FTYPE val, int it)
 
   val -= cwidth;
   int base = ((int) val / cwidth % (map_len - 1)) + 1;
-  double perc = (val - (cwidth * (int) (val / cwidth))) / cwidth;
+  FTYPE perc = (val - (cwidth * (int) (val / cwidth))) / cwidth;
   int top = base + 1;
   if (top >= map_len)
     top = 1;

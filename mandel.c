@@ -5,13 +5,13 @@
 #include <string.h>
 #include <sys/wait.h>
 
-#include "mandel.h"
 #include "common.h"
+#include "mandel.h"
 #include "colormap.h"
 #include "Image.h"
 
 /* Calculated log (2) beforehand */
-double logtwo = 0.693147180559945;
+FTYPE logtwo = 0.693147180559945;
 
 /* Output options */
 int write_text = 0;		/* Write textfile */
@@ -20,8 +20,8 @@ int write_pipe = 0;		/* Write data through pipe to parent */
 int pipe_fid = 0;		/* Pipe to parent */
 
 FTYPE *gen_mandel_p (int width, int height,
-		     double xmin, double xmax,
-		     double ymin, double ymax, int it, int jobs)
+		     FTYPE xmin, FTYPE xmax,
+		     FTYPE ymin, FTYPE ymax, int it, int jobs)
 {
   /* Prepare job handling data */
   int *job_height = xmalloc (jobs * sizeof (int));
@@ -34,7 +34,7 @@ FTYPE *gen_mandel_p (int width, int height,
 
       htotal += job_height[jobn];
     }
-  double job_y = (ymax - ymin) / jobs;
+  FTYPE job_y = (ymax - ymin) / jobs;
   int *read_pipe = xmalloc ((jobs + 1) * sizeof (int));
 
   /* Generate fractal */
@@ -155,10 +155,10 @@ void gzip_file (char *filename)
 }
 
 FTYPE *gen_mandel (int width, int height,
-		   double xmin, double xmax, double ymin, double ymax, int it)
+		   FTYPE xmin, FTYPE xmax, FTYPE ymin, FTYPE ymax, int it)
 {
-  double xres = (xmax - xmin) / width;
-  double yres = (ymax - ymin) / height;
+  FTYPE xres = (xmax - xmin) / width;
+  FTYPE yres = (ymax - ymin) / height;
 
   /* Fractal data */
   FTYPE *img = (FTYPE *) xmalloc (width * height * sizeof (FTYPE));
@@ -171,14 +171,14 @@ FTYPE *gen_mandel (int width, int height,
   return img;
 }
 
-FTYPE get_val (double creal, double cimag, int it)
+FTYPE get_val (FTYPE creal, FTYPE cimag, int it)
 {
   /* Init Z */
-  double zreal = 0;
-  double zimag = 0;
+  FTYPE zreal = 0;
+  FTYPE zimag = 0;
 
   int count = 0;
-  double ztemp;
+  FTYPE ztemp;
   while ((zreal * zreal + zimag * zimag < 2 * 2) && count < it)
     {
       /* Z = Z^2 + C */

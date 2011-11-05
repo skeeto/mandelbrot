@@ -23,19 +23,19 @@ int gzip_output = 0;
 /* Parameters */
 int width = 800;
 int height = 600;
-double xmin = -2.5;
-double xmax = 1.5;
-double ymin = -1.5;
-double ymax = 1.5;
+FTYPE xmin = -2.5;
+FTYPE xmax = 1.5;
+FTYPE ymin = -1.5;
+FTYPE ymax = 1.5;
 int it = 256;
 int jobs = 1;
 
 /* Zoom */
 int zoom_it = 1;
-double zoom_rate = 0.1;
+FTYPE zoom_rate = 0.1;
 int zoom_jobs = 2;
-double zoomx = -1.268794803623;
-double zoomy = 0.353676833206;
+FTYPE zoomx = -1.268794803623;
+FTYPE zoomy = 0.353676833206;
 
 void print_version ()
 {
@@ -123,8 +123,8 @@ int main (int argc, char **argv)
 	  /* Adjust image location */
 	  if (zi > 0)
 	    {
-	      double xrange = xmax - xmin;
-	      double yrange = ymax - ymin;
+	      FTYPE xrange = xmax - xmin;
+	      FTYPE yrange = ymax - ymin;
 
 	      if (fabs (xmin + xrange / 2 - zoomx) <
 		  (zoom_rate * xrange * 0.5))
