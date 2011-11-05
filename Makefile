@@ -18,7 +18,7 @@
 
 CC = gcc
 CFLAGS = -O2 -W -Wall
-LDFLAGS = -lm
+LDLIBS = -lm
 
 objects = bmpWriter.o \
 	mandel.o \
@@ -29,7 +29,6 @@ objects = bmpWriter.o \
 
 # Main program linking
 mandel : $(objects)
-	$(CC) $(LDFLAGS) $^ -o $@
 
 # Objects
 mandel.o : mandel.c \
