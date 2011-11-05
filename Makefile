@@ -21,7 +21,7 @@ bmpWriter.o: bmpWriter.c \
 	bmpFormat.h
 Image.o: Image.c \
 	Image.h \
-	bmpWriter.h 
+	bmpWriter.h
 colormap.o: colormap.c \
 	colormap.h \
 	Image.h \
