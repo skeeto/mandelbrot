@@ -174,7 +174,7 @@ int main (int argc, char **argv)
 	    {
 	      printf ("Image : %dx%d, %d iterations, %d jobs\n",
 		      width, height, it, jobs);
-	      printf ("Data  : x => [%f, %f], y => [%f, %f]\n",
+	      printf ("Data  : x => [%Lf, %Lf], y => [%Lf, %Lf]\n",
 		      xmin, xmax, ymin, ymax);
 	    }
 
